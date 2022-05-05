@@ -77,9 +77,9 @@ int main(int argc, char* argv[])
     while (1)
     {
         //------------------------------------------------------------
-        // Waiting for Connection
+        
         socket = serverSocket->WaitForConnection(1000);
-
+        std::cerr << "Waiting for Connection" << std::endl;
         if (socket.IsNotNull()) // if client connected
         {
             // Create a message buffer to receive header
@@ -91,9 +91,11 @@ int main(int argc, char* argv[])
             igtl::TimeStamp::Pointer ts;
             ts = igtl::TimeStamp::New();
 
+            std::cerr << "looop" << std::endl;
+
             //------------------------------------------------------------
             // loop
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
 
                 // Initialize receive buffer
@@ -173,6 +175,9 @@ int main(int argc, char* argv[])
                 }
             }
         }
+        //------------------------------------------------------------
+  
+
     }
 
     //------------------------------------------------------------
@@ -353,6 +358,10 @@ int ReceivePoint(igtl::Socket* socket, igtl::MessageHeader* header)
     pointMsg->SetMessageHeader(header);
     pointMsg->AllocatePack();
 
+
+    igtl::PointMessage::Pointer pointMsgSend;
+    pointMsgSend = igtl::PointMessage::New();
+    pointMsgSend->SetDeviceName("PointSender");
     // Receive transform data from the socket
     bool timeout(false);
     socket->Receive(pointMsg->GetPackBodyPointer(), pointMsg->GetPackBodySize(), timeout);
@@ -383,7 +392,19 @@ int ReceivePoint(igtl::Socket* socket, igtl::MessageHeader* header)
             std::cerr << " Radius    : " << std::fixed << pointElement->GetRadius() << std::endl;
             std::cerr << " Owner     : " << pointElement->GetOwner() << std::endl;
             std::cerr << "================================" << std::endl;
+
+
+
+            pointElement->SetName("POINT_Nowy");
+            pointElement->SetGroupName("GROUP_1");
+            
+            pointElement->SetPosition(-pos[0], -pos[1],-pos[2]);
+            pointMsg->AddPointElement(pointElement);
+            pointMsg->Pack();
+            socket->Send(pointMsg->GetPackPointer(), pointMsg->GetPackSize());
         }
+
+        
     }
 
     return 1;
